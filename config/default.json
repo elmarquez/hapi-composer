@@ -1,0 +1,31 @@
+{
+  "server": {},
+  "connections": [
+    {
+      "port": 9000,
+      "labels": ["www"]
+    },
+    {
+      "port": 9001,
+      "labels": ["admin"]
+    }
+  ],
+  "plugins": [
+    {
+      "./plugins/admin": [
+        {
+          "select": ["admin"],
+          "options": {}
+        }
+      ]
+    },
+    {
+      "./plugins/www": [
+        {
+          "select": ["www"],
+          "options": {}
+        }
+      ]
+    }
+  ]
+}
