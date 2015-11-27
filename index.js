@@ -9,11 +9,14 @@ if (process.env.NODE_CONFIG_DIR) {
     console.info('%s: Loading configuration from ' + process.cwd() + '/config', new Date(Date.now()));
 }
 
+var Fs = require('fs');
 var Hapi = require('hapi');
 var Path = require('path');
 var cfg = {};
 var cloud = require('cloud-env');
 var config = require('config');
+var pkg;
+var pluginPath;
 var server;
 var signals =  ['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT',
     'SIGBUS', 'SIGFPE', 'SIGUSR1', 'SIGSEGV', 'SIGUSR2', 'SIGTERM'];
@@ -106,15 +109,13 @@ config.get('connections').forEach(function (connection) {
 
 // Plugins
 config.get('plugins').forEach(function (plugin) {
-    var p = Path.join(__dirname, plugin.path);
-    var name = Path.basename(p);
-    console.info('%s: Registering ' + name + ' plugin', new Date(Date.now()));
-    server.register(require(p), plugin.options, function (err) {
+    pkg = JSON.parse(Fs.readFileSync(Path.join(process.cwd(), plugin.path,'package.json'), 'utf8'));
+    console.info('%s: Registering ' + pkg.name + ' plugin', new Date(Date.now()));
+    server.register(require(Path.join(process.cwd(), plugin.path)), plugin.options, function (err) {
         if (err) {
-            console.info('%s: Failed to register plugin: ' + name + '\n\n%s', err, new Date(Date.now()));
+            console.info('%s: Failed to register plugin: ' + pkg.name + '\n\n%s', err, new Date(Date.now()));
         }
     });
-
 });
 
 // Handle environment signals
