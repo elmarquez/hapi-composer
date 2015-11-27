@@ -1,31 +1,41 @@
 {
-  "server": {},
+  "server": {
+    "app": {
+      "secrets": {}
+    },
+    "debug": {
+      "log": ["error"],
+      "request": ["info"]
+    }
+  },
   "connections": [
     {
       "port": 9000,
-      "labels": ["www"]
+      "labels": [
+        "www"
+      ]
     },
     {
       "port": 9001,
-      "labels": ["admin"]
+      "labels": [
+        "admin"
+      ]
     }
   ],
   "plugins": [
     {
-      "./plugins/admin": [
-        {
-          "select": ["admin"],
-          "options": {}
+      "path": "./plugins/admin",
+      "select": ["admin"],
+      "options": {
+        "routes": {
+          "prefix": "/admin"
         }
-      ]
+      }
     },
     {
-      "./plugins/www": [
-        {
-          "select": ["www"],
-          "options": {}
-        }
-      ]
+      "path": "./plugins/www",
+      "select": ["www"],
+      "options": {}
     }
   ]
 }
