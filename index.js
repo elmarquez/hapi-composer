@@ -10,6 +10,8 @@ if (process.env.NODE_CONFIG_DIR) {
 }
 
 var Hapi = require('hapi');
+var Path = require('path');
+var Promise = require('bluebird');
 var cloud = require('cloud-env');
 var config = require('config');
 var manifest = {};
@@ -104,30 +106,42 @@ if (config.has('PORT')) {
 // Server
 server = new Hapi.Server(manifest);
 
-// Connections
+// Open connections
 config.get('connections').forEach(function (connection) {
     console.info('%s: Adding connection port ' + connection.port + ' with labels ' + connection.labels.join(', '), new Date(Date.now()));
     server.connection(connection);
 });
 
-// Plugins
-config.get('plugins').forEach(function (plugin) {
-    console.info('%s: Registering plugin ' + plugin.path, new Date(Date.now()));
-    server.register(require(plugin.path), plugin.options || {}, function (err) {
-        if (err) {
-            console.error('%s: Failed to register plugin ' + plugin.path + '\n\n%s', err, new Date(Date.now()));
-        }
+// Register plugins, then set termination handlers then start the server
+var plugins = config.get('plugins');
+Promise.resolve(plugins)
+    .each(function (plugin) {
+        return new Promise(function (resolve, reject) {
+            console.info('%s: Registering plugin ' + plugin.path, new Date(Date.now()));
+            if (plugin.path.charAt(0) === '.') {
+                plugin.path = Path.join(process.cwd(), plugin.path);
+            }
+            server.register(require(plugin.path), plugin.options || {}, function (err) {
+                if (err) {
+                    reject(err);
+                }
+                resolve(plugin.path);
+            });
+        });
+    })
+    .then(function () {
+        // Handle environment signals
+        setupTerminationHandlers();
+        // Start server
+        server.start(function () {
+            var connections = server.connections.map(function (connection) {
+                return connection.info.uri;
+            });
+            console.info('%s: Application server started at %s', new Date(Date.now()), connections.join(', '));
+            server.log(['info'], 'Application server started at ' + connections.join(', '));
+        });
+    })
+    .catch(function (err) {
+        console.error('%s: Server composition failed', new Date(Date.now()));
+        throw new Error(err);
     });
-});
-
-// Handle environment signals
-setupTerminationHandlers();
-
-// Start server
-server.start(function () {
-    var connections = server.connections.map(function (connection) {
-        return connection.info.uri;
-    });
-    console.info('%s: Application server started at %s', new Date(Date.now()), connections.join(', '));
-    server.log(['info'], 'Application server started at ' + connections.join(', '));
-});

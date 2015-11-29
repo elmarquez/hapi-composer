@@ -15,6 +15,7 @@
   },
   "main": "index.js",
   "dependencies": {
+    "bluebird": "^3.0.5",
     "cloud-env": "^0.1.1",
     "config": "^1.17.1",
     "good": "^6.4.0",
