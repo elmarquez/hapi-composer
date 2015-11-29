@@ -1,8 +1,6 @@
 {
   "server": {
-    "app": {
-      "secrets": {}
-    },
+    "app": {},
     "debug": {
       "log": ["error"],
       "request": ["info"]

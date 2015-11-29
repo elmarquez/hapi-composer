@@ -6,7 +6,7 @@ module.exports = {
             cwd: '.',
             ext: 'js,html',
             nodeArgs: ['--debug'],
-            watch: [ 'index.js','lib/**/*' ]
+            watch: ['index.js']
         },
         script: 'index.js'
     }

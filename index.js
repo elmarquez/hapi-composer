@@ -9,14 +9,11 @@ if (process.env.NODE_CONFIG_DIR) {
     console.info('%s: Loading configuration from ' + process.cwd() + '/config', new Date(Date.now()));
 }
 
-var Fs = require('fs');
 var Hapi = require('hapi');
-var Path = require('path');
-var cfg = {};
 var cloud = require('cloud-env');
 var config = require('config');
+var manifest = {};
 var pkg;
-var pluginPath;
 var server;
 var signals =  ['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT',
     'SIGBUS', 'SIGFPE', 'SIGUSR1', 'SIGSEGV', 'SIGUSR2', 'SIGTERM'];
@@ -86,34 +83,39 @@ function stripFn (o) {
     return obj;
 }
 
-if (config.has('server')) {
-    cfg = stripFn(config.get('server'));
-    Object.keys(cloud).forEach(function (key) {
-        if (isEnvVar(key) && typeof cloud.get(key) === 'string') {
-            cfg.app[key] = cloud.get(key);
-        }
-    });
+manifest = stripFn(config.get('server'));
+Object.keys(cloud).forEach(function (key) {
+    if (isEnvVar(key) && typeof cloud.get(key) === 'string') {
+        manifest.app[key] = cloud.get(key);
+    }
+});
+
+if (config.has('IP')) {
+    manifest.IP = config.get('IP');
+}
+
+if (config.has('PORT')) {
+    manifest.PORT = config.get('PORT');
 }
 
 //-----------------------------------------------------------------------------
 // Create and start the application server
 
 // Server
-server = new Hapi.Server(cfg);
+server = new Hapi.Server(manifest);
 
 // Connections
 config.get('connections').forEach(function (connection) {
-    console.info('%s: Adding connection ' + connection.port + ' with labels ' + connection.labels.join(', '), new Date(Date.now()));
+    console.info('%s: Adding connection port ' + connection.port + ' with labels ' + connection.labels.join(', '), new Date(Date.now()));
     server.connection(connection);
 });
 
 // Plugins
 config.get('plugins').forEach(function (plugin) {
-    pkg = JSON.parse(Fs.readFileSync(Path.join(process.cwd(), plugin.path,'package.json'), 'utf8'));
-    console.info('%s: Registering ' + pkg.name + ' plugin', new Date(Date.now()));
-    server.register(require(Path.join(process.cwd(), plugin.path)), plugin.options, function (err) {
+    console.info('%s: Registering plugin ' + plugin.path, new Date(Date.now()));
+    server.register(require(plugin.path), plugin.options || {}, function (err) {
         if (err) {
-            console.info('%s: Failed to register plugin: ' + pkg.name + '\n\n%s', err, new Date(Date.now()));
+            console.error('%s: Failed to register plugin ' + plugin.path + '\n\n%s', err, new Date(Date.now()));
         }
     });
 });
@@ -123,6 +125,9 @@ setupTerminationHandlers();
 
 // Start server
 server.start(function () {
-    console.info('%s: Application server started at ' + server.info.uri, new Date(Date.now()));
-    server.log(['info'], 'Application server started at ' + server.info.uri);
+    var connections = server.connections.map(function (connection) {
+        return connection.info.uri;
+    });
+    console.info('%s: Application server started at %s', new Date(Date.now()), connections.join(', '));
+    server.log(['info'], 'Application server started at ' + connections.join(', '));
 });

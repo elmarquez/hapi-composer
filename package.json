@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "author": "Davis Marques",
   "private": true,
-  "license": "Copyright (c) Davis Marques 2015",
+  "license": "Copyright (c) Davis Marques 2015. All rights reserved.",
   "repository": {
     "type": "git",
     "url": "https://github.com/elmarquez/hapi-openshift.git"
@@ -17,8 +17,8 @@
   "dependencies": {
     "cloud-env": "^0.1.1",
     "config": "^1.17.1",
-    "good": "^6.3.0",
-    "hapi": "^8.8.1"
+    "good": "^6.4.0",
+    "hapi": "10.x.x"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
@@ -31,7 +31,6 @@
     "grunt-nodemon": "^0.4.0",
     "load-grunt-config": "^0.17.2"
   },
-  "bundleDependencies": [],
   "scripts": {
     "start": "node index.js"
   }
