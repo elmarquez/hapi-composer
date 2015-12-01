@@ -23,8 +23,11 @@
   "plugins": [
     {
       "path": "./plugins/admin",
-      "select": ["admin"],
-      "options": {
+      "pluginOptions": {
+        "select": ["admin"],
+        "options": {}
+      },
+      "registrationOptions": {
         "routes": {
           "prefix": "/admin"
         }
@@ -32,8 +35,10 @@
     },
     {
       "path": "./plugins/www",
-      "select": ["www"],
-      "options": {}
+      "pluginOptions": {
+        "select": ["www"]
+      },
+      "registrationOptions": {}
     }
   ]
 }

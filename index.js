@@ -121,7 +121,11 @@ Promise.resolve(plugins)
             if (plugin.path.charAt(0) === '.') {
                 plugin.path = Path.join(process.cwd(), plugin.path);
             }
-            server.register(require(plugin.path), plugin.options || {}, function (err) {
+            if (!plugin.pluginOptions) {
+                plugin.pluginOptions = {};
+            }
+            plugin.pluginOptions.register = require(plugin.path).register;
+            server.register(plugin.pluginOptions, plugin.registrationOptions || {}, function (err) {
                 if (err) {
                     reject(err);
                 }
