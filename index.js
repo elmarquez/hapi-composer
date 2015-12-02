@@ -113,8 +113,8 @@ config.get('connections').forEach(function (connection) {
 });
 
 // Register plugins, then set termination handlers then start the server
-var plugins = config.get('plugins');
-Promise.resolve(plugins)
+Promise
+    .resolve(config.get('plugins'))
     .each(function (plugin) {
         return new Promise(function (resolve, reject) {
             console.info('%s: Registering plugin ' + plugin.path, new Date(Date.now()));
@@ -128,8 +128,17 @@ Promise.resolve(plugins)
             server.register(plugin.pluginOptions, plugin.registrationOptions || {}, function (err) {
                 if (err) {
                     reject(err);
+                } else {
+                    // Execute post-registration actions. This is valid only for js
+                    // based configuration files.
+                    if (plugin.afterRegistration && typeof plugin.afterRegistration === 'function') {
+                        try {
+                            delete plugin.pluginOptions.register;
+                        } catch (e) {}
+                        plugin.afterRegistration(plugin, server);
+                    }
+                    resolve(plugin.path);
                 }
-                resolve(plugin.path);
             });
         });
     })
