@@ -15,6 +15,7 @@ var Promise = require('bluebird');
 var cloud = require('cloud-env');
 var config = require('config');
 var manifest = {};
+var module;
 var pkg;
 var server;
 var signals =  ['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT',
@@ -86,6 +87,10 @@ function stripFn (o) {
 }
 
 manifest = stripFn(config.get('server'));
+if (!manifest.app) {
+    manifest.app = {};
+}
+
 Object.keys(cloud).forEach(function (key) {
     if (isEnvVar(key) && typeof cloud.get(key) === 'string') {
         manifest.app[key] = cloud.get(key);
@@ -124,7 +129,12 @@ Promise
             if (!plugin.pluginOptions) {
                 plugin.pluginOptions = {};
             }
-            plugin.pluginOptions.register = require(plugin.path).register;
+            try {
+                module = require(plugin.path);
+                plugin.pluginOptions.register = module.register;
+            } catch (err) {
+                throw new Error('Plugin ' + plugin.path + ' not found.\n\n' + err);
+            }
             server.register(plugin.pluginOptions, plugin.registrationOptions || {}, function (err) {
                 if (err) {
                     reject(err);
