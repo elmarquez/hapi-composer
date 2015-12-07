@@ -1,7 +1,7 @@
 {
   "name": "hapi-openshift",
   "description": "Composable application server for OpenShift",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Davis Marques",
   "private": true,
   "license": "Copyright (c) Davis Marques 2015. All rights reserved.",
