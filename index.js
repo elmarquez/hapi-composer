@@ -126,16 +126,15 @@ Promise
             if (plugin.path.charAt(0) === '.') {
                 plugin.path = Path.join(process.cwd(), plugin.path);
             }
-            if (!plugin.pluginOptions) {
-                plugin.pluginOptions = {};
-            }
             try {
                 module = require(plugin.path);
+                plugin.pluginOptions = plugin.pluginOptions || {};
                 plugin.pluginOptions.register = module.register;
+                plugin.registrationOptions = plugin.registrationOptions || {};
             } catch (err) {
-                throw new Error('Plugin ' + plugin.path + ' not found.\n\n' + err);
+                reject('Plugin ' + plugin.path + ' not found.');
             }
-            server.register(plugin.pluginOptions, plugin.registrationOptions || {}, function (err) {
+            server.register(plugin.pluginOptions, plugin.registrationOptions, function (err) {
                 if (err) {
                     reject(err);
                 } else {
