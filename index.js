@@ -113,7 +113,7 @@ server = new Hapi.Server(manifest);
 
 // Open connections
 config.get('connections').forEach(function (connection) {
-    console.info('%s: Adding connection port ' + connection.port + ' with labels ' + connection.labels.join(', '), new Date(Date.now()));
+    console.info('%s: Adding connection port %s with labels %s', new Date(Date.now()), connection.port, connection.labels.join(', '));
     server.connection(connection);
 });
 
@@ -122,7 +122,7 @@ Promise
     .resolve(config.get('plugins'))
     .each(function (plugin) {
         return new Promise(function (resolve, reject) {
-            console.info('%s: Registering plugin ' + plugin.path, new Date(Date.now()));
+            console.info('%s: Registering plugin %s', new Date(Date.now()), plugin.path);
             if (plugin.path.charAt(0) === '.') {
                 plugin.path = Path.join(process.cwd(), plugin.path);
             }

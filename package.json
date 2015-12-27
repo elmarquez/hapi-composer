@@ -1,13 +1,13 @@
 {
-  "name": "hapi-openshift",
-  "description": "Composable application server for OpenShift",
+  "name": "hapi-composer",
+  "description": "Composable application server",
   "version": "0.1.3",
   "author": "Davis Marques",
   "private": true,
   "license": "Copyright (c) Davis Marques 2015. All rights reserved.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/elmarquez/hapi-openshift.git"
+    "url": "https://github.com/elmarquez/hapi-composer.git"
   },
   "engines": {
     "node": ">= 0.10.0",
