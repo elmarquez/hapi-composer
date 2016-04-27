@@ -132,8 +132,14 @@ Promise
                 plugin.pluginOptions.register = module.register;
                 plugin.registrationOptions = plugin.registrationOptions || {};
             } catch (err) {
-                reject('Plugin ' + plugin.path + ' not found.');
+                reject(err);
             }
+            // Execute pre-registration actions. This is valid only for js
+            // based configuration files.
+            if (plugin.beforeRegistration && typeof plugin.beforeRegistration === 'function') {
+                plugin.beforeRegistration(plugin, server);
+            }
+            // Register the plugin
             server.register(plugin.pluginOptions, plugin.registrationOptions, function (err) {
                 if (err) {
                     reject(err);
